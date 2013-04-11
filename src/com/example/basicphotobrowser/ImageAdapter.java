@@ -5,7 +5,6 @@ import java.io.File;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Environment;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,22 +19,16 @@ import android.widget.ImageView;
  * The constants in the beginning of this class determine the start-up view.
  */
 public class ImageAdapter extends BaseAdapter {
-
 	
 	// the resolution independent measurements used for the UI
 	public final int CELL_SIZE_DP = 120;
 	public final int PADDING_SIZE_DP = 8;
 
-	// the initial directory to look for pictures
-	public final String START_DIRECTORY = Environment.getExternalStorageDirectory().getAbsolutePath() + "/DCIM/Camera";
-
 	// the bitmap that is shown before the real bitmaps are loaded
 	public final Bitmap PLACEHOLDER_BITMAP;
 
-
-
 	// link back to the main activity
-	private Context parentContext;
+	public final Context PARENT_CONTEXT;
 
 	// to be calculated based on the DP measurements
 	private int cellSize;
@@ -50,19 +43,19 @@ public class ImageAdapter extends BaseAdapter {
 
 
 
-	public ImageAdapter(Context context) {
-
-		parentContext = context;
+	public ImageAdapter(Context context, String startDirectory) {
+		
+		PARENT_CONTEXT = context;
 
 		// calculate the resolution independent measurements
 		cellSize = dipsToPixels(CELL_SIZE_DP);
 		paddingSize = dipsToPixels(PADDING_SIZE_DP);
 
 		// create a placeholder bitmap for those images that are still loading
-		PLACEHOLDER_BITMAP = BitmapFactory.decodeResource(parentContext.getResources(), R.drawable.ic_launcher);
+		PLACEHOLDER_BITMAP = BitmapFactory.decodeResource(PARENT_CONTEXT.getResources(), R.drawable.ic_launcher);
 
 		// keep track of where we are
-		currentDirectory = START_DIRECTORY;
+		currentDirectory = startDirectory;
 
 		// this does not save the full file path, just file names
 		images = new File(currentDirectory).list();
@@ -96,7 +89,7 @@ public class ImageAdapter extends BaseAdapter {
 		if (convertView == null) {
 
 			// set attributes of the imageview
-			imageView = new ImageView(parentContext);
+			imageView = new ImageView(PARENT_CONTEXT);
 			imageView.setLayoutParams(new GridView.LayoutParams(cellSize, cellSize));
 			imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 			imageView.setPadding(paddingSize, paddingSize, paddingSize, paddingSize);
@@ -123,7 +116,7 @@ public class ImageAdapter extends BaseAdapter {
 		// this is done by creating an asynchronous task that loads the image in the background
 		// the options.inSampleSize value is used to keep memory usage down so the app doesn't crash!
 		final BitmapWorkerTask task = new BitmapWorkerTask(imageView, filePath, options);
-		final AsyncDrawable asyncDrawable = new AsyncDrawable(parentContext.getResources(), PLACEHOLDER_BITMAP, task);
+		final AsyncDrawable asyncDrawable = new AsyncDrawable(PARENT_CONTEXT.getResources(), PLACEHOLDER_BITMAP, task);
 		imageView.setImageDrawable(asyncDrawable);
 		
 		// the task is only executed AFTER we have created an AsyncDrawable
@@ -136,7 +129,7 @@ public class ImageAdapter extends BaseAdapter {
 
 	// used to dynamically calculate the cell size
 	private int dipsToPixels(int dips) {
-		return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dips, parentContext.getResources().getDisplayMetrics());
+		return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dips, PARENT_CONTEXT.getResources().getDisplayMetrics());
 	}
 	
 	// used to get the best thumbnail ratio for decoding each bitmap in a memory-preserving way
