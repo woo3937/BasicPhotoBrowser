@@ -1,5 +1,7 @@
 package com.example.basicphotobrowser;
 
+import java.io.File;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Environment;
@@ -21,6 +23,9 @@ public class MainActivity extends Activity {
 	// used to change the folder in configuration changes
 	final String SELECTED_FOLDER_KEY = "SELECTED_FOLDER_KEY";
 	String selectedFolder;
+	
+	final String PREVIOUS_FOLDER_KEY = "PREVIOUS_FOLDER_KEY";
+	String previousFolder;
 
 
 	GridView gridview;
@@ -33,7 +38,7 @@ public class MainActivity extends Activity {
 		selectedFolder = STARTUP_DIRECTORY;
 
 		gridview = (GridView) findViewById(R.id.gridview);
-		
+
 		// the onClick part does almost nothing currently
 		// but should ideally send the photo to the PixelSense or open detail view
 		gridview.setOnItemClickListener(new OnItemClickListener() {
@@ -48,8 +53,19 @@ public class MainActivity extends Activity {
 		setUpGridView(selectedFolder);
 	}
 
+
+	/*
+	 * Hooks the GridView up with the Adapter. Also checks if the folder exists before attempting to load it.
+	 */
 	private void setUpGridView(String selectedFolder) {
-		gridview.setAdapter(new ImageAdapter(this, selectedFolder));
+
+		if (new File(selectedFolder).isDirectory()) {
+			gridview.setAdapter(new ImageAdapter(this, selectedFolder));
+		}
+		else {
+			Toast.makeText(MainActivity.this, selectedFolder + " is not a folder", Toast.LENGTH_LONG).show();
+			gridview.setAdapter(new ImageAdapter(this, previousFolder));
+		}
 	}
 
 	@Override
@@ -73,6 +89,7 @@ public class MainActivity extends Activity {
 			// handles search queries that are submitted
 			@Override
 			public boolean   onQueryTextSubmit(String query) {
+				previousFolder = selectedFolder;
 				selectedFolder = query.trim();
 
 				// forces a configuration change, so we can load from a different folder
@@ -90,6 +107,7 @@ public class MainActivity extends Activity {
 
 		// put values in bundle to save between configuration changes (e.g. language change or rotation)
 		outState.putString(SELECTED_FOLDER_KEY, selectedFolder);
+		outState.putString(PREVIOUS_FOLDER_KEY, previousFolder);
 	}
 
 
@@ -98,9 +116,9 @@ public class MainActivity extends Activity {
 
 		// retrieve values from bundle
 		selectedFolder = savedInstanceState.getString(SELECTED_FOLDER_KEY);
-		
-		
-		
+		previousFolder = savedInstanceState.getString(PREVIOUS_FOLDER_KEY);
+
+
 		// associate the gridview in the layout with an image adapter
 		setUpGridView(selectedFolder);
 	}

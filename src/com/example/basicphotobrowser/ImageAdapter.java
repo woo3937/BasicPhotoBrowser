@@ -52,7 +52,7 @@ public class ImageAdapter extends BaseAdapter {
 		paddingSize = dipsToPixels(PADDING_SIZE_DP);
 
 		// create a placeholder bitmap for those images that are still loading
-		PLACEHOLDER_BITMAP = BitmapFactory.decodeResource(PARENT_CONTEXT.getResources(), R.drawable.ic_launcher);
+		PLACEHOLDER_BITMAP = BitmapFactory.decodeResource(PARENT_CONTEXT.getResources(), R.drawable.unknown);
 
 		// keep track of where we are
 		currentDirectory = startDirectory;
@@ -91,7 +91,7 @@ public class ImageAdapter extends BaseAdapter {
 			// set attributes of the imageview
 			imageView = new ImageView(PARENT_CONTEXT);
 			imageView.setLayoutParams(new GridView.LayoutParams(cellSize, cellSize));
-			imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+			imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 			imageView.setPadding(paddingSize, paddingSize, paddingSize, paddingSize);
 
 		} else {
